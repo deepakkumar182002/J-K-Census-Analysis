@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Census Analysis & Prediction</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #000000;
+            --secondary-color: #1a1a1a;
+            --accent-color: #ffffff;
+            --text-color: #ffffff;
+            --bg-color: #000000;
+            --card-bg: #1a1a1a;
+            --nav-text: #ffffff;
+            --nav-hover: rgba(255, 255, 255, 0.1);
+        }
+
+        [data-theme="light"] {
+            --primary-color: #ffffff;
+            --secondary-color: #f0f0f0;
+            --accent-color: #000000;
+            --text-color: #000000;
+            --bg-color: #ffffff;
+            --card-bg: #f0f0f0;
+            --nav-text: #000000;
+            --nav-hover: rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: all 0.3s ease;
+        }
+
+        .container { max-width: 1200px; margin: 30px auto; }
+        .card { 
+            margin-bottom: 20px; 
+            background-color: var(--card-bg);
+            border: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .chart-container { 
+            position: relative; 
+            height: 400px; 
+            margin-bottom: 20px; 
+        }
+        .stats-card { 
+            background-color: var(--card-bg); 
+            padding: 15px; 
+            border-radius: 5px; 
+            margin-bottom: 10px;
+            transition: transform 0.3s ease;
+        }
+        .stats-card:hover {
+            transform: translateY(-5px);
+        }
+        .error-message { color: red; margin: 10px 0; }
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            padding: 15px 0;
+        }
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #3498db, #2ecc71);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .nav-link {
+            position: relative;
+            padding: 8px 15px;
+            margin: 0 5px;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            color: var(--nav-text) !important;
+        }
+        .nav-link:hover {
+            background: var(--nav-hover);
+            transform: translateY(-2px);
+        }
+        .nav-link.active {
+            background: linear-gradient(45deg, #3498db, #2ecc71);
+            color: white !important;
+        }
+        .theme-switch { cursor: pointer; }
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(45deg, #3498db, #2ecc71);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            transition: transform 0.3s ease;
+        }
+        .feature-icon:hover {
+            transform: scale(1.1);
+        }
+        .process-step {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 25px;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        .process-step:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+        .process-step i {
+            font-size: 2.5rem;
+            background: linear-gradient(45deg, #3498db, #2ecc71);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1.5rem;
+        }
+        .tab-content {
+            padding: 20px;
+            background-color: var(--card-bg);
+            border-radius: 0 0 10px 10px;
+        }
+        .nav-tabs {
+            border: none;
+            margin-bottom: 20px;
+        }
+        .nav-tabs .nav-link {
+            color: var(--accent-color);
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            margin: 0 5px;
+            transition: all 0.3s ease;
+        }
+        .nav-tabs .nav-link.active {
+            background: linear-gradient(45deg, #3498db, #2ecc71);
+            color: white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        .nav-tabs .nav-link:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+        .navbar-nav {
+            margin-left: auto !important;
+        }
+        .features-section {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            margin-bottom: 30px;
+        }
+        .features-section h2 {
+            color: var(--accent-color);
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: bold;
+        }
+        .about-section {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        .about-section h2 {
+            color: var(--accent-color);
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: bold;
+        }
+        .about-section h4 {
+            color: var(--accent-color);
+            margin-bottom: 20px;
+        }
+        .about-section i {
+            background: linear-gradient(45deg, #3498db, #2ecc71);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .about-section ul {
+            list-style: none;
+            padding: 0;
+        }
+        .about-section ul li {
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        .about-section ul li:hover {
+            transform: translateX(10px);
+            color: #3498db;
+        }
+        .about-section ul li:last-child {
+            border-bottom: none;
+        }
+        .upload-section {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+        }
+        .upload-section:hover {
+            transform: translateY(-5px);
+        }
+        .upload-header {
+            color: var(--accent-color);
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .upload-header i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            background: linear-gradient(45deg, #3498db, #2ecc71);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .upload-form {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 25px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+        .custom-file-upload {
+            border: 2px dashed var(--accent-color);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .custom-file-upload:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #3498db;
+        }
+        .custom-file-upload i {
+            font-size: 2rem;
+            color: var(--accent-color);
+            margin-bottom: 10px;
+        }
+        .upload-btn {
+            background: linear-gradient(45deg, #3498db, #2ecc71);
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            color: white;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+        .upload-btn i {
+            margin-right: 8px;
+        }
+        .file-name {
+            color: var(--accent-color);
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-chart-bar me-2"></i>
+                Census Analysis & Prediction
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#upload-section">
+                            <i class="fas fa-upload me-1"></i> Upload Data
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#analysis-section">
+                            <i class="fas fa-chart-line me-1"></i> Analysis
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#features-section">
+                            <i class="fas fa-star me-1"></i> Features
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#about-section">
+                            <i class="fas fa-info-circle me-1"></i> About
+                        </a>
+                    </li>
+                </ul>
+                <div class="theme-switch ms-3" onclick="toggleTheme()">
+                    <i class="fas fa-moon fa-lg"></i>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Upload Section -->
+        <section id="upload-section" class="mb-5">
+            <div class="upload-section">
+                <div class="upload-header">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <h3>Upload Your Dataset</h3>
+                    <p>Upload your census data in CSV or Excel format for analysis</p>
+                </div>
+                <div class="upload-form">
+                    <form id="uploadForm" enctype="multipart/form-data">
+                        <div class="custom-file-upload" onclick="document.getElementById('file').click()">
+                            <i class="fas fa-file-upload"></i>
+                            <h5>Drag & Drop or Click to Upload</h5>
+                            <p>Supported formats: CSV, Excel</p>
+                            <input type="file" class="d-none" id="file" name="file" accept=".csv,.xlsx" onchange="updateFileName(this)">
+                        </div>
+                        <div class="text-center mt-4">
+                            <div class="file-name" id="fileName"></div>
+                            <button type="submit" class="upload-btn">
+                                <i class="fas fa-upload"></i>Upload and Analyze
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- Analysis Section -->
+        <section id="analysis-section" class="mb-5">
+            <div id="results" style="display: none;">
+                <!-- Summary Statistics -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-chart-pie me-2"></i>Summary Statistics</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row" id="summaryStats"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Population and Literacy Charts -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-users me-2"></i>Population Distribution</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="populationChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-book-reader me-2"></i>Literacy Rate Distribution</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="literacyChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gender and Education Distribution -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-venus-mars me-2"></i>Gender Distribution</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="genderChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-graduation-cap me-2"></i>Education Levels</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="educationChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Religion and Household Amenities -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-pray me-2"></i>Religion Distribution</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="religionChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-home me-2"></i>Household Amenities</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="amenitiesChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section id="features-section" class="mb-5">
+            <div class="features-section">
+                <h2><i class="fas fa-star me-2"></i>Features</h2>
+                <ul class="nav nav-tabs" id="featuresTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="key-features-tab" data-bs-toggle="tab" data-bs-target="#key-features" type="button" role="tab">
+                            <i class="fas fa-star me-2"></i>Key Features
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="how-it-works-tab" data-bs-toggle="tab" data-bs-target="#how-it-works" type="button" role="tab">
+                            <i class="fas fa-cogs me-2"></i>How It Works
+                        </button>
+                    </li>
+                </ul>
+                <div class="tab-content" id="featuresTabContent">
+                    <div class="tab-pane fade show active" id="key-features" role="tabpanel">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="text-center">
+                                    <i class="fas fa-chart-pie feature-icon"></i>
+                                    <h4>Comprehensive Analysis</h4>
+                                    <p>Detailed analysis of population, literacy, and demographic data</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-center">
+                                    <i class="fas fa-chart-line feature-icon"></i>
+                                    <h4>Interactive Visualizations</h4>
+                                    <p>Dynamic charts and graphs for better data understanding</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-center">
+                                    <i class="fas fa-file-export feature-icon"></i>
+                                    <h4>Easy Data Import</h4>
+                                    <p>Support for CSV and Excel files with automatic processing</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="how-it-works" role="tabpanel">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="process-step text-center">
+                                    <i class="fas fa-upload"></i>
+                                    <h4>Upload Data</h4>
+                                    <p>Upload your census data in CSV or Excel format</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="process-step text-center">
+                                    <i class="fas fa-cogs"></i>
+                                    <h4>Process</h4>
+                                    <p>Our system automatically processes and analyzes your data</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="process-step text-center">
+                                    <i class="fas fa-chart-bar"></i>
+                                    <h4>Visualize</h4>
+                                    <p>View comprehensive visualizations and insights</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about-section" class="mb-5">
+            <div class="about-section">
+                <h2><i class="fas fa-info-circle me-2"></i>About This Project</h2>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h4><i class="fas fa-project-diagram me-2"></i>Project Overview</h4>
+                        <p>This Census Analysis & Prediction project is designed to help analyze and visualize demographic data from census surveys. It provides powerful tools for data analysis, visualization, and prediction of demographic trends.</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h4><i class="fas fa-tools me-2"></i>Technologies Used</h4>
+                        <ul>
+                            <li><i class="fas fa-code me-2"></i>Python for data processing and analysis</li>
+                            <li><i class="fas fa-server me-2"></i>Flask for the web framework</li>
+                            <li><i class="fas fa-chart-bar me-2"></i>Chart.js for interactive visualizations</li>
+                            <li><i class="fas fa-paint-brush me-2"></i>Bootstrap for responsive design</li>
+                            <li><i class="fas fa-brain me-2"></i>Machine Learning for predictions</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Theme Switcher
+        function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            body.setAttribute('data-theme', newTheme);
+            
+            // Update theme icon
+            const themeIcon = document.querySelector('.theme-switch i');
+            themeIcon.className = newTheme === 'dark' ? 'fas fa-sun fa-lg' : 'fas fa-moon fa-lg';
+            
+            // Save theme preference
+            localStorage.setItem('theme', newTheme);
+        }
+
+        // Load saved theme
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            document.body.setAttribute('data-theme', savedTheme);
+            const themeIcon = document.querySelector('.theme-switch i');
+            themeIcon.className = savedTheme === 'dark' ? 'fas fa-sun fa-lg' : 'fas fa-moon fa-lg';
+        }
+
+        // File Upload Handler
+        document.getElementById('uploadForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData();
+            const fileInput = document.getElementById('file');
+            formData.append('file', fileInput.files[0]);
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+
+                // Show results section
+                document.getElementById('results').style.display = 'block';
+
+                // Update summary statistics
+                const summary = data.summary;
+                document.getElementById('summaryStats').innerHTML = `
+                    <div class="col-md-4">
+                        <div class="stats-card">
+                            <h6><i class="fas fa-users me-2"></i>Population Statistics</h6>
+                            <p>Total Districts: ${summary.total_districts}</p>
+                            <p>Total Population: ${summary.total_population.toLocaleString()}</p>
+                            <p>Average Population: ${summary.avg_population.toLocaleString()}</p>
+                            <p>Max Population: ${summary.max_population.toLocaleString()}</p>
+                            <p>Min Population: ${summary.min_population.toLocaleString()}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stats-card">
+                            <h6><i class="fas fa-book-reader me-2"></i>Literacy Statistics</h6>
+                            <p>Average Literacy Rate: ${summary.avg_literacy.toFixed(2)}%</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stats-card">
+                            <h6><i class="fas fa-home me-2"></i>Household Statistics</h6>
+                            <p>Total Households: ${summary.total_households.toLocaleString()}</p>
+                            <p>Rural Households: ${summary.rural_households.toLocaleString()}</p>
+                            <p>Urban Households: ${summary.urban_households.toLocaleString()}</p>
+                        </div>
+                    </div>
+                `;
+
+                // Create charts with enhanced styling
+                const chartData = data.chart_data;
+                
+                // Population Chart
+                new Chart(document.getElementById('populationChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: chartData.labels,
+                        datasets: [{
+                            label: 'Population',
+                            data: chartData.population,
+                            backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: getComputedStyle(document.body).getPropertyValue('--text-color')
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                ticks: {
+                                    color: getComputedStyle(document.body).getPropertyValue('--text-color')
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    color: getComputedStyle(document.body).getPropertyValue('--text-color')
+                                }
+                            }
+                        }
+                    }
+                });
+
+                // Literacy Chart
+                new Chart(document.getElementById('literacyChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: chartData.labels,
+                        datasets: [{
+                            label: 'Literacy Rate (%)',
+                            data: chartData.literacy_rate,
+                            backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: getComputedStyle(document.body).getPropertyValue('--text-color')
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                ticks: {
+                                    color: getComputedStyle(document.body).getPropertyValue('--text-color')
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    color: getComputedStyle(document.body).getPropertyValue('--text-color')
+                                }
+                            }
+                        }
+                    }
+                });
+
+                // Gender Chart
+                new Chart(document.getElementById('genderChart'), {
+                    type: 'pie',
+                    data: {
+                        labels: ['Male', 'Female'],
+                        datasets: [{
+                            data: [chartData.gender_distribution.male, chartData.gender_distribution.female],
+                            backgroundColor: ['rgba(54, 162, 235, 0.5)', 'rgba(255, 99, 132, 0.5)'],
+                            borderColor: ['rgba(54, 162, 235, 1)', 'rgba(255, 99, 132, 1)'],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: getComputedStyle(document.body).getPropertyValue('--text-color')
+                                }
+                            }
+                        }
+                    }
+                });
+
+                // Education Chart
+                new Chart(document.getElementById('educationChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: ['Below Primary', 'Primary', 'Middle', 'Secondary', 'Higher', 'Graduate'],
+                        datasets: [{
+                            label: 'Number of People',
+                            data: [
+                                chartData.education_levels.below_primary,
+                                chartData.education_levels.primary,
+                                chartData.education_levels.middle,
+                                chartData.education_levels.secondary,
+                                chartData.education_levels.higher,
+                                chartData.education_levels.graduate
+                            ],
+                            backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: getComputedStyle(document.body).getPropertyValue('--text-color')
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                ticks: {
+                                    color: getComputedStyle(document.body).getPropertyValue('--text-color')
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    color: getComputedStyle(document.body).getPropertyValue('--text-color')
+                                }
+                            }
+                        }
+                    }
+                });
+
+                // Religion Chart
+                new Chart(document.getElementById('religionChart'), {
+                    type: 'pie',
+                    data: {
+                        labels: ['Hindu', 'Muslim', 'Christian', 'Sikh', 'Buddhist', 'Jain', 'Others'],
+                        datasets: [{
+                            data: [
+                                chartData.religion_distribution.hindu,
+                                chartData.religion_distribution.muslim,
+                                chartData.religion_distribution.christian,
+                                chartData.religion_distribution.sikh,
+                                chartData.religion_distribution.buddhist,
+                                chartData.religion_distribution.jain,
+                                chartData.religion_distribution.others
+                            ],
+                            backgroundColor: [
+                                'rgba(255, 99, 132, 0.5)',
+                                'rgba(54, 162, 235, 0.5)',
+                                'rgba(255, 206, 86, 0.5)',
+                                'rgba(75, 192, 192, 0.5)',
+                                'rgba(153, 102, 255, 0.5)',
+                                'rgba(255, 159, 64, 0.5)',
+                                'rgba(199, 199, 199, 0.5)'
+                            ],
+                            borderColor: [
+                                'rgba(255, 99, 132, 1)',
+                                'rgba(54, 162, 235, 1)',
+                                'rgba(255, 206, 86, 1)',
+                                'rgba(75, 192, 192, 1)',
+                                'rgba(153, 102, 255, 1)',
+                                'rgba(255, 159, 64, 1)',
+                                'rgba(199, 199, 199, 1)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: getComputedStyle(document.body).getPropertyValue('--text-color')
+                                }
+                            }
+                        }
+                    }
+                });
+
+                // Amenities Chart
+                new Chart(document.getElementById('amenitiesChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: ['LPG/PNG', 'Electricity', 'Internet', 'Computer'],
+                        datasets: [{
+                            label: 'Number of Households',
+                            data: [
+                                chartData.household_amenities.lpg_png,
+                                chartData.household_amenities.electricity,
+                                chartData.household_amenities.internet,
+                                chartData.household_amenities.computer
+                            ],
+                            backgroundColor: 'rgba(153, 102, 255, 0.5)',
+                            borderColor: 'rgba(153, 102, 255, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: getComputedStyle(document.body).getPropertyValue('--text-color')
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                ticks: {
+                                    color: getComputedStyle(document.body).getPropertyValue('--text-color')
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    color: getComputedStyle(document.body).getPropertyValue('--text-color')
+                                }
+                            }
+                        }
+                    }
+                });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while processing the file.');
+            });
+        });
+
+        // Add this to your existing JavaScript
+        function updateFileName(input) {
+            const fileName = input.files[0]?.name;
+            document.getElementById('fileName').textContent = fileName ? `Selected file: ${fileName}` : '';
+        }
+
+        // Add drag and drop functionality
+        const dropZone = document.querySelector('.custom-file-upload');
+        
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight(e) {
+            dropZone.classList.add('bg-light');
+        }
+
+        function unhighlight(e) {
+            dropZone.classList.remove('bg-light');
+        }
+
+        dropZone.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            document.getElementById('file').files = files;
+            updateFileName(document.getElementById('file'));
+        }
+    </script>
+</body>
+</html>
